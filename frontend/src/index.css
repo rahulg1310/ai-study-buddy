@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@theme {
+  /* --- Color tokens: a study desk at night — dark chalkboard shell, warm paper surfaces --- */
+  --color-ink: #1b2a22;
+  --color-ink-light: #25392e;
+  --color-ink-soft: #2f4536;
+
+  --color-paper: #f8f1e3;
+  --color-paper-card: #fffcf6;
+  --color-paper-line: #e7dabd;
+
+  --color-pencil: #3f4a40;
+  --color-pencil-soft: #707b6f;
+
+  --color-highlighter: #f2c744;
+  --color-highlighter-dark: #d6a925;
+
+  --color-coral: #e2674a;
+  --color-coral-dark: #c44f35;
+
+  --color-chalk-blue: #7fadc4;
+  --color-chalk-blue-dark: #517d93;
+
+  --color-sage: #6b9080;
+  --color-sage-dark: #4f7464;
+
+  /* --- Type tokens --- */
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-body: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  --font-hand: "Caveat", cursive;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", monospace;
+
+  --shadow-card: 0 1px 2px rgba(27, 42, 34, 0.06), 0 6px 16px -4px rgba(27, 42, 34, 0.12);
+  --shadow-card-lg: 0 4px 6px rgba(27, 42, 34, 0.07), 0 14px 32px -8px rgba(27, 42, 34, 0.18);
+  --shadow-flip: 0 18px 38px -10px rgba(27, 42, 34, 0.35);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-paper-line);
+  }
+  html {
+    font-family: var(--font-body);
+  }
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-pencil);
+    font-feature-settings: "ss01";
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-chalk-blue-dark);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background-color: var(--color-highlighter);
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  /* Paper card: the base "index card" surface used across the app */
+  .paper-card {
+    background-color: var(--color-paper-card);
+    border: 1px solid var(--color-paper-line);
+    border-radius: 0.625rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Faint ruled-notebook texture, used behind chat & notes content */
+  .ruled-bg {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 27px,
+      var(--color-paper-line) 27px,
+      var(--color-paper-line) 28px
+    );
+  }
+
+  /* Handwritten margin tag — the app's signature recurring motif */
+  .margin-tag {
+    font-family: var(--font-hand);
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  /* Pin dot decoration for cards, like a thumbtack */
+  .pin-dot::before {
+    content: "";
+    position: absolute;
+    top: 0.65rem;
+    left: 0.9rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--color-coral);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.25);
+  }
+
+  .btn-highlight {
+    background-color: var(--color-highlighter);
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .btn-highlight:hover {
+    background-color: var(--color-highlighter-dark);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-paper-line) transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
