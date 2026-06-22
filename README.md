@@ -1,0 +1,1 @@
+an AI-powered study platform that helps students learn from their own notes instead of just reading them. Upload your study material, chat with your documents, generate flashcards and quizzes, and create personalized study plans—all in one place.
