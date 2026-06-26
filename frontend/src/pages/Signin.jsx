@@ -1,11 +1,15 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import AuthBrandPanel from '../components/AuthBrandPanel'
 import { Lock } from 'lucide-react';
 import { Mail } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios'
+import LoadModal from '../components/LoadModal';
+import { UserData } from '../context/UserContext';
 
 const Signin = () => {
+  const {user,setUser} = useContext(UserData);
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password,setPassword] = useState('');
@@ -51,10 +55,32 @@ const Signin = () => {
                 <span className="text-xs text-pencil-soft">or</span>
                 <div className="flex-1 h-px bg-paper-line" />
             </div>
-            <form onSubmit={(e)=>{
+            <form onSubmit={async (e)=>{
                 e.preventDefault();
                 if(!validate()) return;
-                navigate('/dashboard');
+                try{
+                    setLoading(true);
+                    const res = await axios.post(`http://127.0.0.1:8000/signin`,{
+                        email,
+                        password
+                    })
+                    setUser(res.data.user);
+                    localStorage.setItem("user",JSON.stringify(res.data.user));
+                    localStorage.setItem("token",res.data.token);
+                    navigate('/dashboard');
+                }
+                catch(error){
+                    const message = error.response?.data?.detail;
+                    if(message.includes('User')){
+                        setEmailError(message);
+                    }
+                    if(message.includes('password')){
+                        setPassError(message);
+                    }
+                }
+                finally{
+                    setLoading(false);
+                }
             }} className='space-y-2'>
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-ink mb-1.5">
@@ -98,7 +124,7 @@ const Signin = () => {
                     </div>
                     <span className='text-[11px] text-[#ff2929] ml-1'>{passError}</span>
                 </div>
-                <button type="submit" className='bg-amber-400/50 disabled:cursor-not-allowed flex items-center justify-center rounded-lg font-body font-semibold transition-colors duration-150 w-full text-black py-2 gap-2 text-[15px] hover:bg-amber-400 shadow-lg'>
+                <button disabled={loading} type="submit" className='bg-amber-400/50 disabled:cursor-not-allowed flex items-center justify-center rounded-lg font-body font-semibold transition-colors duration-150 w-full text-black py-2 gap-2 text-[15px] hover:bg-amber-400 shadow-lg'>
                     <span>Sign in</span>
                     <ArrowRight size={18} className=''/>
                 </button>
@@ -115,6 +141,9 @@ const Signin = () => {
             </form>
         </div>
       </div>
+      {
+        loading && (<LoadModal />)
+      }
     </div>
   )
 }

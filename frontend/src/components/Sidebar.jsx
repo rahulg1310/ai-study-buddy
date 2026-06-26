@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { BookOpen } from 'lucide-react'
 import { navItems } from './navConfig'
 import { Flame } from 'lucide-react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
+import { UserData } from '../context/UserContext'
 
 const Sidebar = () => {
+  const {user,setUser} = useContext(UserData);
   const navigate = useNavigate();
   const location = useLocation();
   return (
@@ -52,12 +54,15 @@ const Sidebar = () => {
                 R
             </div>
             <div className="min-w-0 flex flex-col items-start">
-                <p className="text-sm font-medium text-paper truncate">Rahul Ganesan</p>
-                <p className="text-xs text-paper/50 truncate">rahulganesan3@gmail.com</p>
+                <p className="text-sm font-medium text-paper truncate">{user?.name}</p>
+                <p className="text-xs text-paper/50 truncate">{user?.email}</p>
             </div>
         </button>
         <button
           onClick={()=>{
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            setUser(null);
             navigate('/');
           }}
           className="flex items-center gap-2.5 w-full px-2 py-2 mt-1 rounded-lg text-sm text-paper/60 hover:text-paper hover:bg-ink-light transition-colors"

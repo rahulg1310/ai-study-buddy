@@ -83,16 +83,10 @@ const Signup = () => {
                 
               )
               console.log(res.data.message);
-              const newUser={
-                id: res.data.id,
-                name : res.data.name,
-                email : res.data.email
-              }
-              setUser(newUser);
               navigate('/signin');
             }
             catch(error){
-              setEmailError(error.response?.data?.message || "Something went wrong")
+              setEmailError(error.response?.data?.detail || "Something went wrong")
             }
             finally{
               setLoading(false);
