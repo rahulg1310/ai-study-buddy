@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import LoadModal from '../components/LoadModal';
 import { UserData } from '../context/UserContext';
+import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const Signin = () => {
   const {user,setUser} = useContext(UserData);
@@ -16,6 +18,30 @@ const Signin = () => {
   const [loading,setLoading] = useState(false);
   const [passError, setPassError] = useState('');
   const [emailError,setEmailError] = useState('');
+  const googleLogin = useGoogleLogin({
+    onSuccess : async (response)=>{
+        try{
+            setLoading(true);
+            const res = await axios.post(`http://127.0.0.1:8000/google-signin`,{
+            accessToken : response.access_token
+            })
+            setUser(res.data.user);
+            localStorage.setItem("user",JSON.stringify(res.data.user));
+            localStorage.setItem("token",JSON.stringify(res.data.token));
+            navigate('/dashboard');
+        }
+        catch(error){
+            console.log(error);
+            setEmailError(error.response.data.message);
+        }
+        finally{
+            setLoading(false);
+        }
+    },
+    onError : ()=>{
+        console.log("Google Login Failed");
+    }
+  })
   const validate = () =>{
     setEmailError('');
     setPassError('');
@@ -46,7 +72,11 @@ const Signin = () => {
             <p className="text-pencil-soft text-sm mb-8">
             Pick up right where you left off
             </p>
-            <button className="w-full flex items-center justify-center gap-2.5 border border-pencil/25 rounded-lg py-2.5 text-sm font-semibold text-ink hover:bg-paper-card transition-colors mb-5 disabled:opacity-50">
+            <button 
+            onClick={()=>{
+                googleLogin();
+            }}
+            className="w-full flex items-center justify-center gap-2.5 border border-pencil/25 rounded-lg py-2.5 text-sm font-semibold text-ink hover:bg-paper-card transition-colors mb-5 disabled:opacity-50">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png" alt="" className='w-5 h-5' />
             Continue with Google
             </button>

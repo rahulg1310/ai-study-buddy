@@ -11,7 +11,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   return (
-    <div className="flex min-h-screen w-68 flex-col bg-ink text-paper">
+    <div className="flex h-screen w-68 flex-col bg-ink text-paper sticky top-0">
       <div className="flex items-center gap-2 px-6 pt-6 pb-5">
         <div className="flex items-center justify-center w-8 h-8 rounded-md bg-highlighter text-ink">
           <BookOpen className="w-4.5 h-4.5" strokeWidth={2.25} />
