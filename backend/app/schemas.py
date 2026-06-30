@@ -8,3 +8,6 @@ class SignUpRequest(BaseModel):
 class SignInRequest(BaseModel):
     email : str
     password : str
+
+class GoogleSignInRequest(BaseModel):
+    credentials : str
