@@ -23,7 +23,7 @@ const Signin = () => {
         try{
             setLoading(true);
             const res = await axios.post(`http://127.0.0.1:8000/google-signin`,{
-            accessToken : response.access_token
+            credentials : response.access_token
             })
             setUser(res.data.user);
             localStorage.setItem("user",JSON.stringify(res.data.user));
