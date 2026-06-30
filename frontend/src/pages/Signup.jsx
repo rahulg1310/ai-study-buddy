@@ -52,23 +52,6 @@ const Signup = () => {
             <div className="w-full max-w-sm mx-auto">
           <h1 className="font-display text-3xl text-ink mb-2">Create your account</h1>
           <p className="text-pencil-soft text-sm mb-8">Free to start. Upload your first set of notes in under a minute.</p>
-          <button
-            onClick={()=>{
-
-            }}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2.5 border border-pencil/25 rounded-lg py-2.5 text-sm font-semibold text-ink hover:bg-paper-card transition-colors mb-5 disabled:opacity-50"
-          >
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png" alt="" className='w-5 h-5' />
-            Continue with Google
-          </button>
-
-          <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 h-px bg-paper-line" />
-            <span className="text-xs text-pencil-soft">or</span>
-            <div className="flex-1 h-px bg-paper-line" />
-          </div>
-
           <form onSubmit={async (e)=>{
             e.preventDefault();
             if(!validate()) return;

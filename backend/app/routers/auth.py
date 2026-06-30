@@ -56,13 +56,13 @@ def signin(user : SignInRequest , db : Session = Depends(get_db)):
     }
 
 @router.post('/google-signin')
-def googlein(user : GoogleSignInRequest, db : Session = Depends(get_db)):
+def google_signin(user : GoogleSignInRequest, db : Session = Depends(get_db)):
     
     google_user=get_google_user(user.credentials)
     
     existing_user=db.query(User).filter(User.email==google_user["email"]).first()
     if not existing_user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Email not found")
     token=create_access_token(existing_user.id)
     return{
         "message": "Google login successful",

@@ -32,7 +32,7 @@ const Signin = () => {
         }
         catch(error){
             console.log(error);
-            setEmailError(error.response.data.message);
+            setEmailError(error.response.data.detail);
         }
         finally{
             setLoading(false);
