@@ -7,10 +7,25 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import StatsCard from '../components/StatsCard'
 import UploadZone from '../components/UploadZone'
 import { DocData } from '../context/DocumentsContext'
+import { FileStack } from 'lucide-react'
+import DocumentCard from '../components/DocumentCard'
+import Modal from '../components/Modal'
+import { Sparkle } from 'lucide-react'
 
 const Documents = () => {
+  const navigate = useNavigate();
+  const [docPendingDelete, setDocPendingDelete] = useState(null);
   const {docs,setDocs} = useContext(DocData);
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  async function confirmDelete(){
+    setDocs((prev)=>{
+        return prev.filter((doc)=>{
+            return doc.id !== docPendingDelete.id;
+        });
+    });
+    setDocPendingDelete(null);
+    }
   async function handleFiles(files) {
     setUploading(true);
     try{
@@ -48,7 +63,33 @@ const Documents = () => {
           </header>
           <div className='max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6'>
             <UploadZone onFiles={handleFiles} busy={uploading}/>
-            
+            {docs.length === 0 ? (
+              <EmptyState
+                icon={FileStack}
+                title="Nothing uploaded yet"
+                description="Drop a PDF, Word doc, or text file above to get started — your summary and flashcards will be ready in moments."
+              />
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {docs.map((doc) => (
+                  <DocumentCard key={doc.id} doc={doc} onDelete={setDocPendingDelete} />
+                ))}
+              </div>
+            )}
+
+            <Modal open={Boolean(docPendingDelete)} onClose={() => setDocPendingDelete(null)} title="Delete this document?">
+              <p className="text-sm text-pencil-soft mb-5">
+                "{docPendingDelete?.title}" and its flashcards, quizzes, and chat history will be removed. This can't be undone.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button className='bg-black disabled:cursor-not-allowed flex items-center justify-center rounded-lg font-body font-semibold transition-colors duration-150 w-full text-black py-2 gap-2 text-[15px] hover:bg-black/50 shadow-lg text-white'  onClick={() => setDocPendingDelete(null)}>
+                  Cancel
+                </button>
+                <button className='bg-red-500 disabled:cursor-not-allowed flex items-center justify-center rounded-lg font-body font-semibold transition-colors duration-150 w-full text-black py-2 gap-2 text-[15px] hover:bg-black/50 shadow-lg text-white' onClick={confirmDelete}>
+                  Delete
+                </button>
+              </div>
+            </Modal>
           </div>
       </div>
     </div>
