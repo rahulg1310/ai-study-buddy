@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import EmptyState from '../ui/EmptyState'
 import { Flame } from 'lucide-react'
@@ -6,9 +6,10 @@ import { Upload } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import StatsCard from '../components/StatsCard'
 import UploadZone from '../components/UploadZone'
+import { DocData } from '../context/DocumentsContext'
 
 const Documents = () => {
-  const [docs, setDocs] = useState([]);
+  const {docs,setDocs} = useContext(DocData);
   const [uploading, setUploading] = useState(false);
   async function handleFiles(files) {
     setUploading(true);
