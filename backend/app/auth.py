@@ -3,8 +3,10 @@ from jose import jwt
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from google.oauth2 import id_token
+from fastapi.security import  OAuth2PasswordBearer
 import requests
 import os
+from jose import JWTError
 
 load_dotenv()
 
@@ -16,6 +18,8 @@ pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
+
+oauth2_scheme=OAuth2PasswordBearer(tokenUrl="signin")
 
 def hash_password(password):
     return pwd_context.hash(password)
@@ -43,3 +47,17 @@ def get_google_user(access_token : str):
     if response.status_code!=200:
         return None
     return response.json()
+
+def decode_access_token(token : str):
+    try:
+        return jwt.decode(
+        token,
+        SECRET_KEY,
+        algorithms=[ALGORITHM]
+        )
+    except JWTError as e:
+        print("JWT ERROR:", e)
+        return None
+
+    
+    
