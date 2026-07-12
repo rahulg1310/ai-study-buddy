@@ -19,12 +19,28 @@ const Documents = () => {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   async function confirmDelete(){
-    setDocs((prev)=>{
-        return prev.filter((doc)=>{
-            return doc.id !== docPendingDelete.id;
-        });
-    });
-    setDocPendingDelete(null);
+    try{
+        setLoading(true);
+        const token=JSON.parse(localStorage.getItem("token"));
+        await axios.delete(
+            `http://127.0.0.1:8000/documents/${docPendingDelete.id}`,
+            {
+              headers:{
+                Authorization: `Bearer ${token}`
+              }
+            }
+        );
+        setDocs((prev) =>
+            prev.filter((doc) => doc.id !== docPendingDelete.id)
+        );
+        setDocPendingDelete(null);
+    }
+    catch(error){
+      console.log(error);
+    }
+    finally{
+      setLoading(false);
+    }
     }
   async function handleFiles(files) {
     setUploading(true);
