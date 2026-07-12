@@ -66,3 +66,19 @@ def get(token : str = Depends(oauth2_scheme),db : Session = Depends(get_db)):
             for file in files
         ]
     }
+
+@router.delete("/documents/{document_id}")
+def delete(document_id : int, token : str = Depends(oauth2_scheme), db : Session = Depends(get_db)):
+    details = decode_access_token(token)
+    user_id = details["user_id"]
+    existing_user=db.query(User).filter(User.id==user_id).first()
+    if not existing_user:
+        raise HTTPException(status_code=404,detail="User not found")
+    existing_file=db.query(Documents).filter(Documents.id==document_id , Documents.user_id==user_id).first()
+    if not existing_file:
+        raise HTTPException(status_code=404,detail="File not found")
+    db.delete(existing_file)
+    db.commit()
+    return {
+        "message": "Document deleted successfully"
+    }
