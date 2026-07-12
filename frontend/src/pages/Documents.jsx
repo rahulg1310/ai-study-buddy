@@ -4,13 +4,13 @@ import EmptyState from '../ui/EmptyState'
 import { Flame } from 'lucide-react'
 import { Upload } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import StatsCard from '../components/StatsCard'
 import UploadZone from '../components/UploadZone'
 import { DocData } from '../context/DocumentsContext'
 import { FileStack } from 'lucide-react'
 import DocumentCard from '../components/DocumentCard'
 import Modal from '../components/Modal'
 import { Sparkle } from 'lucide-react'
+import axios from 'axios'
 
 const Documents = () => {
   const navigate = useNavigate();
@@ -29,9 +29,20 @@ const Documents = () => {
   async function handleFiles(files) {
     setUploading(true);
     try{
+      const token=JSON.parse(localStorage.getItem("token"));
       for(const file of files){
-        setDocs((prev)=> [file, ...(prev || [])])
+        const formData = new FormData();
+        formData.append("file",file);
+        const res=await axios.post("http://127.0.0.1:8000/documents",formData,{
+          headers:{
+            Authorization : `Bearer ${token}`
+          }
+        });
+        setDocs((prev)=> [res.data, ...(prev || [])])
       }
+    }
+    catch(error){
+      console.log(error);
     }
     finally{
       setUploading(false);
@@ -71,8 +82,8 @@ const Documents = () => {
               />
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {docs.map((doc) => (
-                  <DocumentCard key={doc.id} doc={doc} onDelete={setDocPendingDelete} />
+                {docs.map((doc,idx) => (
+                  <DocumentCard key={idx} doc={doc} onDelete={setDocPendingDelete} />
                 ))}
               </div>
             )}
