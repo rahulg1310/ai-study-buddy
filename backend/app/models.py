@@ -15,6 +15,7 @@ class Documents(Base):
     title=Column(String, nullable=False)
     filename=Column(String)
     file_type=Column(String)
+    file_path=Column(String)
     size=Column(Integer)
     upload_date=Column(DateTime)
     status=Column(String)
