@@ -11,34 +11,61 @@ import { useNavigation } from 'react-router-dom'
 import EmptyState from '../ui/EmptyState'
 import ChatInput from '../components/ChatInput'
 import ChatMessage from '../components/ChatMessage'
+import axios from 'axios'
+import { ChatData } from '../context/ChatContext'
 
 const Chat = () => {
-  function handleSend(text) {
-    setMessages((prev) => [
-        ...prev,
-        {
-            id: Date.now(),
-            role: "user",
-            content: text,
-        },
-        {
-            id: Date.now() + 1,
-            role: "assistant",
-            content: "This is a fake AI response.",
-        },
-    ]);
+  const {
+    messages,
+    setMessages,
+    activeDocId,
+    setActiveDocId,
+    loadingHistory,
+  } = useContext(ChatData);
+  async function handleSend(text) {
+    const userMessage = {
+        id: Date.now(),
+        role: "user",
+        content: text,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setSending(true);
+    try {
+        const token = JSON.parse(localStorage.getItem("token"));
+        const res = await axios.post(
+            `http://127.0.0.1:8000/documents/${activeDocId}/chat`,
+            {
+              message: text,
+            },
+            {
+              headers:{
+                Authorization: `Bearer ${token}`,
+              },
+            }
+        );
+        setMessages((prev) => [
+            ...prev,
+            {
+                id: Date.now() + 1,
+                role: "assistant",
+                content: res.data.answer,
+            },
+        ]);
+    }catch(error) {
+        console.log(error);
+    }finally{
+      setSending(false);
+    }
   }
   const navigate = useNavigate();
   const {user} = useContext(UserData);
   const {docs} = useContext(DocData);
   const location = useLocation()
-  const [activeDocId, setActiveDocId] = useState(null)
   useEffect(() => {
     if (!activeDocId && docs.length > 0) {
-        setActiveDocId(location.state?.docId || docs[0].id);
+        setActiveDocId(location.state?.docId || docs[0]?.id);
     }
   }, [docs]);
-  const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
   const activeDoc = docs.find((doc) => doc.id === activeDocId);
@@ -85,17 +112,26 @@ const Chat = () => {
             <div className="paper-card flex-1 flex flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto p-4 space-y-4  scrollbar-thin">
                 {loading ? (
-                  <LoadModal />
+                    <LoadModal />
+                ) : docs.length === 0 ? (
+                    <EmptyState
+                        icon={Upload}
+                        title="No documents yet"
+                        description="Upload your first PDF, DOCX, or TXT file to start chatting."
+                    />
                 ) : messages.length === 0 ? (
-                  <EmptyState
-                    icon={Sparkles}
-                    title={`Ask anything about "${activeDoc?.title}"`}
-                    description='Try: "Summarize the key points" or "Explain this in simpler terms."'
-                  />
+                    <EmptyState
+                        icon={Sparkles}
+                        title={`Ask anything about "${activeDoc?.title}"`}
+                        description='Try: "Summarize the key points" or "Explain this in simpler terms."'
+                    />
                 ) : (
-                  messages.map(function (m) {
-                    return <ChatMessage key={m.id} message={m} />
-                  })
+                    messages.map((m) => (
+                        <ChatMessage
+                            key={m.id}
+                            message={m}
+                        />
+                    ))
                 )}
                 {sending && (
                   <div className="flex items-center gap-2 text-sm text-pencil-soft pl-9">
@@ -106,7 +142,12 @@ const Chat = () => {
                   </div>
                 )}
               </div>
-              <ChatInput onSend={handleSend} disabled={sending} />
+              {docs.length > 0 && (
+                  <ChatInput
+                      onSend={handleSend}
+                      disabled={sending}
+                  />
+              )}
           </div>
         </div>
       </div>

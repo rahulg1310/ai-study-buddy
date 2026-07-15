@@ -8,6 +8,7 @@ import "@fontsource/caveat";
 import "./index.css";
 import App from './App.jsx'
 import UserContext from './context/UserContext.jsx';
+import ChatContext from './context/ChatContext.jsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import DocumentsContext from './context/DocumentsContext.jsx';
 
@@ -16,7 +17,9 @@ createRoot(document.getElementById('root')).render(
   <UserContext>
     <BrowserRouter>
       <DocumentsContext>
-        <App />
+        <ChatContext >
+          <App />
+        </ChatContext>
       </DocumentsContext>
     </BrowserRouter>
   </UserContext>
