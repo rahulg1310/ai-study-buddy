@@ -1,4 +1,5 @@
 import { Sparkles, BookMarked } from 'lucide-react'
+import ReactMarkdown from "react-markdown";
 
 const ChatMessage = (props) => {
   const message = props.message
@@ -17,7 +18,9 @@ const ChatMessage = (props) => {
             isUser ? 'bg-highlighter text-ink rounded-br-sm' : 'paper-card rounded-bl-sm'
           }`}
         >
+         <ReactMarkdown>
           {message.content}
+         </ReactMarkdown>
         </div>
         {message.citations?.length > 0 && (
           <div className="mt-1.5 space-y-1">

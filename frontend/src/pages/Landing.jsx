@@ -16,17 +16,17 @@ const features = [
   },
   {
     icon: Layers,
-    title: 'Flashcards, generated',
+    title: 'Flashcards, generated (Coming soon...)',
     description: 'Turn any document into a reviewable deck in seconds, then track what you actually remember.',
   },
   {
     icon: ListChecks,
-    title: 'Quizzes with answers',
+    title: 'Quizzes with answers (Coming soon...)',
     description: 'Test yourself with auto-generated multiple choice questions and clear explanations.',
   },
   {
     icon: CalendarRange,
-    title: 'A plan, not just a pile',
+    title: 'A plan, not just a pile (Coming soon...)',
     description: 'Tell it your exam date and get a day-by-day study plan across everything you\'ve uploaded.',
   },
 ]

@@ -3,9 +3,5 @@ import { LayoutDashboard, FileStack, MessageSquare, Layers, ListChecks, Calendar
 export const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/documents', label: 'Documents', icon: FileStack },
-  { to: '/chat', label: 'Chat', icon: MessageSquare },
-  { to: '/flashcards', label: 'Flashcards', icon: Layers },
-  { to: '/quizzes', label: 'Quizzes', icon: ListChecks },
-  { to: '/plan', label: 'Plan', icon: CalendarRange },
-  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/chat', label: 'Chat', icon: MessageSquare }
 ]

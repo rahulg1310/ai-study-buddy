@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
+import LoadModal from '../components/LoadModal';
 
 export const ChatData = createContext();
 
@@ -38,6 +39,7 @@ const ChatContext = ({ children }) => {
     }, [activeDocId]);
 
     return (
+        <div>
         <ChatData.Provider
             value={{
                 messages,
@@ -49,6 +51,10 @@ const ChatContext = ({ children }) => {
         >
             {children}
         </ChatData.Provider>
+        {
+        loadingHistory && (<LoadModal />)
+        }
+        </div>
     );
 };
 

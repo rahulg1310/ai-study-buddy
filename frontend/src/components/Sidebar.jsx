@@ -36,26 +36,15 @@ const Sidebar = () => {
         })}
       </nav>
       <div className="px-4 pb-4 pt-3 border-t border-paper/10">
-        <div className="flex items-center gap-2 px-2 py-2 mb-1 rounded-lg">
-          <div className="flex items-center justify-center w-7 h-7 rounded-full bg-coral/20 text-coral">
-            <Flame className="w-4 h-4" strokeWidth={2.25} />
-          </div>
-          <div className="text-sm">
-            <span className="font-semibold text-paper">0-day</span>{' '}
-            <span className="text-paper/60">streak</span>
-          </div>
-        </div>
         <button 
-        onClick={()=>{
-            navigate('/profile');
-        }}
+        
         className='flex items-center gap-2.5 px-2 py-2 rounded-lg transition-colors hover:bg-ink-light'>
             <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-ink shrink-0 bg-gray-400">
                 R
             </div>
             <div className="min-w-0 flex flex-col items-start">
                 <p className="text-sm font-medium text-paper truncate">{user?.name}</p>
-                <p className="text-xs text-paper/50 truncate">{user?.email}</p>
+                <p className="text-[10px] text-paper/50 truncate">{user?.email}</p>
             </div>
         </button>
         <button

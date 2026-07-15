@@ -62,7 +62,7 @@ const DocumentCard = ({ doc, onDelete}) => {
           {doc.title}
         </h3>
         <p className="text-xs text-pencil-soft mt-1">
-          {doc.uploadedAt} • {doc.pages} pages • {doc.sizeBytes} bytes
+           • {doc.pages} pages 
         </p>
       </div>
       {

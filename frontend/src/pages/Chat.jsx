@@ -78,10 +78,6 @@ const Chat = () => {
             <h1 className="font-display text-xl text-ink truncate">Chat</h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-sm text-pencil-soft px-2.5 py-1.5 rounded-full bg-coral/10">
-              <Flame className="w-3.5 h-3.5 text-coral" strokeWidth={2.5} />
-              <span className="font-semibold text-ink">0</span> day streak
-            </div>
             <button
             onClick={()=>{
             navigate('/documents');
