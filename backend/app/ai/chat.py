@@ -37,6 +37,22 @@ def ask_question(question, document_id):
     If the answer does not exist in the context,
     say you couldn't find it.
 
+    Format your response using Markdown.
+
+    Use:
+
+    # Headings
+
+    ## Subheadings
+
+    - Bullet points
+
+    **Bold** important words.
+
+    Never write one huge paragraph.
+
+    Keep answers concise unless the user explicitly asks for a detailed explanation.
+
     Context:
     {context}
 

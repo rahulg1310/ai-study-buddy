@@ -20,6 +20,7 @@ class Documents(Base):
     upload_date=Column(DateTime)
     status=Column(String)
     user_id=Column(Integer,ForeignKey("users.id"))
+    pages = Column(Integer)
 
 class ChatMessage(Base):
     __tablename__ = "chat_messages"

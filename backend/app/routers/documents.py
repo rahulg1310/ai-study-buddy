@@ -34,12 +34,15 @@ def add(file: UploadFile=File(...),token : str = Depends(oauth2_scheme),db : Ses
         size=fsize,
         upload_date=datetime.now(),
         status="Processing",
-        user_id=details["user_id"]
+        user_id=details["user_id"],
+        pages=0
+
     )
     db.add(new_file)
     db.commit()
     db.refresh(new_file)
     documents = load_pdf(file_path)
+    pages = len(documents)
     chunks = split_documents(documents)
     for chunk in chunks:
         chunk.metadata["document_id"]=new_file.id
@@ -47,6 +50,7 @@ def add(file: UploadFile=File(...),token : str = Depends(oauth2_scheme),db : Ses
         chunk.metadata["filename"] = new_file.filename
     vector_store.add_documents(chunks)
     new_file.status="Uploaded"
+    new_file.pages=pages
     db.commit()
     db.refresh(new_file)
     return{
@@ -56,6 +60,8 @@ def add(file: UploadFile=File(...),token : str = Depends(oauth2_scheme),db : Ses
         "file_type": new_file.file_type,
         "size": new_file.size,
         "status": new_file.status,
+        "upload_date": new_file.upload_date,
+        "pages": new_file.pages
     }
 
 @router.get("/documents")
@@ -67,7 +73,15 @@ def get(token : str = Depends(oauth2_scheme),db : Session = Depends(get_db)):
     existing_user=db.query(User).filter(User.id==user_id).first()
     if not existing_user:
         raise HTTPException(status_code=404,detail="User not found")
-    files=db.query(Documents).filter(Documents.user_id==user_id).all()
+    files = (
+    db.query(Documents)
+    .filter(Documents.user_id == user_id)
+    .order_by(
+        Documents.upload_date.desc(),
+        Documents.id.desc()
+    )
+    .all()
+    )
     return{
         "documents" : [
             {
@@ -76,7 +90,9 @@ def get(token : str = Depends(oauth2_scheme),db : Session = Depends(get_db)):
                 "filename":file.filename,
                 "file_type":file.file_type,
                 "size":file.size,
-                "status":file.status
+                "status":file.status,
+                "upload_date": file.upload_date,
+                "pages": file.pages
             }
             for file in files
         ]
