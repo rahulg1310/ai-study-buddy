@@ -11,3 +11,6 @@ class SignInRequest(BaseModel):
 
 class GoogleSignInRequest(BaseModel):
     credentials : str
+
+class ChatRequest(BaseModel):
+    message: str

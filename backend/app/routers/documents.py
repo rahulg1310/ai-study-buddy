@@ -1,3 +1,7 @@
+import os
+from app.ai.ingest import load_pdf, split_documents
+from app.ai.vector_store import vector_store
+from app.utils.file import save_file
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models import Documents
@@ -6,6 +10,7 @@ from app.database import get_db
 from fastapi import File, UploadFile
 from datetime import date, datetime
 from app.auth import oauth2_scheme, decode_access_token
+from app.models import ChatMessage
 
 router = APIRouter()
 
@@ -19,21 +24,31 @@ def add(file: UploadFile=File(...),token : str = Depends(oauth2_scheme),db : Ses
     existing_file=db.query(Documents).filter(Documents.filename==file.filename , Documents.user_id==user_id).first()
     if existing_file:
         raise HTTPException(status_code=400,detail="File already exists. Please upload a new file")
-    contents=file.file.read()
-    fsize=len(contents)
+    file_path = save_file(file)
+    fsize = os.path.getsize(file_path)
     new_file=Documents(
         title=file.filename,
         filename=file.filename,
         file_type=file.content_type,
+        file_path=file_path,
         size=fsize,
         upload_date=datetime.now(),
-        status="Uploaded",
+        status="Processing",
         user_id=details["user_id"]
     )
     db.add(new_file)
     db.commit()
     db.refresh(new_file)
-
+    documents = load_pdf(file_path)
+    chunks = split_documents(documents)
+    for chunk in chunks:
+        chunk.metadata["document_id"]=new_file.id
+        chunk.metadata["user_id"]=user_id
+        chunk.metadata["filename"] = new_file.filename
+    vector_store.add_documents(chunks)
+    new_file.status="Uploaded"
+    db.commit()
+    db.refresh(new_file)
     return{
         "id": new_file.id,
         "title": new_file.title,
@@ -77,6 +92,9 @@ def delete(document_id : int, token : str = Depends(oauth2_scheme), db : Session
     existing_file=db.query(Documents).filter(Documents.id==document_id , Documents.user_id==user_id).first()
     if not existing_file:
         raise HTTPException(status_code=404,detail="File not found")
+    db.query(ChatMessage).filter(
+    ChatMessage.document_id == document_id
+    ).delete()
     db.delete(existing_file)
     db.commit()
     return {

@@ -20,3 +20,12 @@ class Documents(Base):
     upload_date=Column(DateTime)
     status=Column(String)
     user_id=Column(Integer,ForeignKey("users.id"))
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    id = Column(Integer, primary_key=True)
+    role = Column(String)
+    content = Column(String)
+    created_at = Column(DateTime)
+    document_id = Column(Integer, ForeignKey("documents.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
