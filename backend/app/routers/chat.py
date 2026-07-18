@@ -33,9 +33,21 @@ def chat(
             status_code=404,
             detail="Document not found"
         )
+    history = (
+    db.query(ChatMessage)
+    .filter(
+        ChatMessage.user_id == user_id,
+        ChatMessage.document_id == document_id
+    )
+    .order_by(ChatMessage.created_at.desc())
+    .limit(8)
+    .all()
+    )
+    history.reverse()
     answer = ask_question(
         request.message,
-        document_id
+        document_id,
+        history
     )
     user_message = ChatMessage(
         role="user",

@@ -55,22 +55,43 @@ def signin(user : SignInRequest , db : Session = Depends(get_db)):
         }
     }
 
-@router.post('/google-signin')
-def google_signin(user : GoogleSignInRequest, db : Session = Depends(get_db)):
-    
-    google_user=get_google_user(user.credentials)
-    
-    existing_user=db.query(User).filter(User.email==google_user["email"]).first()
-    if not existing_user:
-        raise HTTPException(status_code=404, detail="Email not found")
-    token=create_access_token(existing_user.id)
-    return{
-        "message": "Google login successful",
-        "token": token,
-        "user": {
-            "id": existing_user.id,
-            "name": existing_user.name,
-            "email": existing_user.email
+@router.post("/google-signin")
+def google_signin(
+    user: GoogleSignInRequest,
+    db: Session = Depends(get_db)
+):
+    try:
+        google_user = get_google_user(user.credentials)
+        if not google_user:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid Google credentials"
+            )
+        existing_user = (
+            db.query(User)
+            .filter(User.email == google_user["email"])
+            .first()
+        )
+        if not existing_user:
+            raise HTTPException(
+                status_code=404,
+                detail="Email not found"
+            )
+        token = create_access_token(existing_user.id)
+        return {
+            "message": "Google login successful",
+            "token": token,
+            "user": {
+                "id": existing_user.id,
+                "name": existing_user.name,
+                "email": existing_user.email
+            }
         }
-    }
-
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Google Sign-in Error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Something went wrong during Google sign-in."
+        )

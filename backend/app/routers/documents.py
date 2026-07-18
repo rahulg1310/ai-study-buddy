@@ -1,5 +1,5 @@
 import os
-from app.ai.ingest import load_pdf, split_documents
+from app.ai.ingest import load_document, split_documents
 from app.ai.vector_store import vector_store
 from app.utils.file import save_file
 from fastapi import APIRouter, Depends, HTTPException
@@ -11,6 +11,8 @@ from fastapi import File, UploadFile
 from datetime import date, datetime
 from app.auth import oauth2_scheme, decode_access_token
 from app.models import ChatMessage
+from app.ai.ingest import load_document, split_documents
+import uuid
 
 router = APIRouter()
 
@@ -21,10 +23,16 @@ def add(file: UploadFile=File(...),token : str = Depends(oauth2_scheme),db : Ses
     existing_user=db.query(User).filter(User.id==user_id).first()
     if not existing_user:
         raise HTTPException(status_code=404,detail="User not found")
-    existing_file=db.query(Documents).filter(Documents.filename==file.filename , Documents.user_id==user_id).first()
-    if existing_file:
-        raise HTTPException(status_code=400,detail="File already exists. Please upload a new file")
-    file_path = save_file(file)
+    MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
+    contents = file.file.read()
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="File size exceeds 25 MB."
+        )
+    file.file.seek(0)
+    saved_file = save_file(file)
+    file_path = saved_file["file_path"]
     fsize = os.path.getsize(file_path)
     new_file=Documents(
         title=file.filename,
@@ -41,28 +49,44 @@ def add(file: UploadFile=File(...),token : str = Depends(oauth2_scheme),db : Ses
     db.add(new_file)
     db.commit()
     db.refresh(new_file)
-    documents = load_pdf(file_path)
-    pages = len(documents)
-    chunks = split_documents(documents)
-    for chunk in chunks:
-        chunk.metadata["document_id"]=new_file.id
-        chunk.metadata["user_id"]=user_id
-        chunk.metadata["filename"] = new_file.filename
-    vector_store.add_documents(chunks)
-    new_file.status="Uploaded"
-    new_file.pages=pages
-    db.commit()
-    db.refresh(new_file)
-    return{
-        "id": new_file.id,
-        "title": new_file.title,
-        "filename": new_file.filename,
-        "file_type": new_file.file_type,
-        "size": new_file.size,
-        "status": new_file.status,
-        "upload_date": new_file.upload_date,
-        "pages": new_file.pages
-    }
+    try:
+        documents = load_document(file_path)
+        pages = len(documents)
+        chunks = split_documents(documents)
+        chunk_ids=[]
+        for chunk in chunks:
+            chunk_id=str(uuid.uuid4())
+            chunk.metadata["chunk_id"] = chunk_id
+            chunk.metadata["document_id"] = new_file.id
+            chunk.metadata["user_id"] = user_id
+            chunk.metadata["filename"] = new_file.filename
+            chunk_ids.append(chunk_id)
+        vector_store.add_documents(documents=chunks,ids=chunk_ids)
+        new_file.status="Uploaded"
+        new_file.pages=pages
+        new_file.chunk_ids = chunk_ids
+        db.commit()
+        db.refresh(new_file)
+        return{
+            "id": new_file.id,
+            "title": new_file.title,
+            "filename": new_file.filename,
+            "file_type": new_file.file_type,
+            "size": new_file.size,
+            "status": new_file.status,
+            "upload_date": new_file.upload_date,
+            "pages": new_file.pages
+        }
+    except Exception as e:
+        db.delete(new_file)
+        db.commit()
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unable to process document: {str(e)}"
+        )
+    
 
 @router.get("/documents")
 def get(token : str = Depends(oauth2_scheme),db : Session = Depends(get_db)):
@@ -111,6 +135,12 @@ def delete(document_id : int, token : str = Depends(oauth2_scheme), db : Session
     db.query(ChatMessage).filter(
     ChatMessage.document_id == document_id
     ).delete()
+    if existing_file.chunk_ids:
+        vector_store.delete(
+            ids=existing_file.chunk_ids
+        )
+    if os.path.exists(existing_file.file_path):
+        os.remove(existing_file.file_path)
     db.delete(existing_file)
     db.commit()
     return {

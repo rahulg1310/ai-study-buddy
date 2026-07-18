@@ -10,13 +10,18 @@ llm = ChatGoogleGenerativeAI(
     google_api_key=os.getenv("GOOGLE_API_KEY")
 )
 
-def ask_question(question, document_id):
+def ask_question(question, document_id, history):
     docs = retrieve_chunks(question, document_id)
 
     context = "\n\n".join(
         doc.page_content
         for doc in docs
     )
+
+    conversation = "\n".join(
+    f"{msg.role.capitalize()}: {msg.content}"
+    for msg in history
+)
 
     prompt = f"""
     You are Grace, an AI Study Buddy.
@@ -53,8 +58,14 @@ def ask_question(question, document_id):
 
     Keep answers concise unless the user explicitly asks for a detailed explanation.
 
+    Use the conversation history to understand follow-up questions
+    and references like "it", "that", or "this".
+
     Context:
     {context}
+
+    Conversation History:
+    {conversation}
 
     Question:
     {question}
