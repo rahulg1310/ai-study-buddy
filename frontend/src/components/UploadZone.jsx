@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
 import { UploadCloud } from 'lucide-react'
 
-const ACCEPTED = '.pdf,.docx,.doc,.txt'
+const ACCEPTED = '.pdf,.docx,.txt'
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 export default function UploadZone({onFiles , busy}){
     const [dragging, setDragging] = useState(false);
@@ -9,7 +10,15 @@ export default function UploadZone({onFiles , busy}){
 
     const handleFiles = ((fileList)=>{
         const files = Array.from(fileList || [])
-        if(files.length) onFiles(files)
+        const validFiles = [];
+        for (const file of files) {
+            if (file.size > MAX_FILE_SIZE) {
+                alert(`${file.name} exceeds the 25 MB limit.`);
+                continue;
+            }
+            validFiles.push(file);
+        }
+        if(validFiles.length) onFiles(validFiles)
     })
 
     return (
