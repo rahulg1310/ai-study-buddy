@@ -75,8 +75,16 @@ def ask_question(question, document_id, history):
     response = llm.invoke(prompt)
     return response.text
 
-def generate_flashcards(text):
+def generate_flashcards(text, existing_questions):
+    previous = "\n".join(
+        f"- {q}"
+        for q in existing_questions
+    )
     prompt = f"""
+    Already generated questions:
+
+    {previous}
+
     You are Grace, an AI Study Buddy.
 
     Generate EXACTLY 3 flashcards from the study material below.
@@ -90,6 +98,10 @@ def generate_flashcards(text):
         - answer
     - Questions should test important concepts.
     - Answers should be concise.
+    - Do NOT repeat any of the above questions.
+    - Do NOT generate paraphrases of the above questions.
+    - Cover different concepts from the study material.
+    - If there are no new concepts left, return an empty JSON array [].
 
     Example format:
 

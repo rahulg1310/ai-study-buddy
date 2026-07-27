@@ -14,3 +14,6 @@ class GoogleSignInRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str
+
+class FlashcardRequest(BaseModel):
+    existing_questions: list[str] = []
