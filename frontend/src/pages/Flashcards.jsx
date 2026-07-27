@@ -9,23 +9,10 @@ import {
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import { DocData } from "../context/DocumentsContext";
+import LoadModal from "../components/LoadModal";
+import axios from "axios";
 
 const Flashcards = () => {
-  const dummyCards = [
-  {
-    question: "What is TCP?",
-    answer: "Transmission Control Protocol"
-  },
-  {
-    question: "What is UDP?",
-    answer: "User Datagram Protocol"
-  },
-  {
-    question: "Which layer is HTTP?",
-    answer: "Application Layer"
-  }
-  ];
-
   const navigate = useNavigate();
   const { docs } = useContext(DocData);
   const [activeDoc, setActiveDoc] = useState(null);
@@ -35,6 +22,7 @@ const Flashcards = () => {
   const [known, setKnown] = useState(0);
   const [learning, setLearning] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
@@ -49,14 +37,27 @@ const Flashcards = () => {
     setLoading(false);
   }, [activeDoc]);
 
-  function handleGenerate() {
+  async function handleGenerate() {
     setGenerating(true);
+    setUploading(true);
+    const existingQuestions = cards.map(card => card.question);
+    try {
+        const response = await axios.post(
+            `http://127.0.0.1:8000/documents/${activeDoc.id}/flashcards`,
+            {
+              existing_questions: existingQuestions
+            }
+        );
 
-    setTimeout(() => {
+        const newCards = response.data;
+        if (newCards.length === 0) {
+        alert("No more flashcards can be generated from this document.");
+        return;
+        }
         setCards(prev =>
             prev.length === 0
-                ? dummyCards
-                : [...prev, ...dummyCards]
+                ? newCards
+                : [...prev, ...newCards]
         );
 
         if (cards.length === 0) {
@@ -66,8 +67,13 @@ const Flashcards = () => {
         }
 
         setFlipped(false);
+
+    } catch (err) {
+        console.error(err);
+    } finally {
         setGenerating(false);
-    }, 800);
+        setUploading(false);
+    }
   }
 
   function handleReview(isKnown) {
@@ -91,29 +97,15 @@ const Flashcards = () => {
     return (
         <div className="min-h-screen flex bg-paper">
             <Sidebar />
-
             <div className="flex-1 flex items-center justify-center">
-
                 <div className="text-center">
-
                     <h1 className="font-display text-4xl mb-4">
                         Deck complete 🎉
                     </h1>
-
                     <p className="text-xl text-pencil-soft mb-8">
                         {known} known · {learning} still learning
                     </p>
-
                     <div className="flex gap-4 justify-center">
-
-                        <button
-                            onClick={restart}
-                            className="border px-6 py-3 rounded-xl"
-                        >
-                            <RotateCcw className="inline mr-2 w-5 h-5"/>
-                            Review Again
-                        </button>
-
                         <button
                             onClick={handleGenerate}
                             className="bg-highlighter px-6 py-3 rounded-xl"
@@ -121,13 +113,12 @@ const Flashcards = () => {
                             <Sparkles className="inline mr-2 w-5 h-5"/>
                             Generate More Cards
                         </button>
-
                     </div>
-
                 </div>
-
             </div>
-
+            {
+              uploading && (<LoadModal />)
+            }
         </div>
     );
 }
@@ -263,6 +254,9 @@ const Flashcards = () => {
           )}
         </div>
       </div>
+      {
+        uploading && (<LoadModal />)
+      }
     </div>
   );
 };
