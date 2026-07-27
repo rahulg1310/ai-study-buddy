@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth
 from app.routers import documents
 from app.routers import chat
+from app.routers import flashcards
 from app.database import engine,Base
 from app.models import User
 
@@ -23,6 +24,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(documents.router)
 app.include_router(chat.router)
+app.include_router(flashcards.router)
 
 @app.get('/')
 def home():

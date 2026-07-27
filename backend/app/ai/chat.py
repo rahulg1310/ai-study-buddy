@@ -2,6 +2,7 @@ from app.ai.retriever import retrieve_chunks
 from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
@@ -73,3 +74,52 @@ def ask_question(question, document_id, history):
 
     response = llm.invoke(prompt)
     return response.text
+
+def generate_flashcards(text):
+    prompt = f"""
+    You are Grace, an AI Study Buddy.
+
+    Generate EXACTLY 3 flashcards from the study material below.
+
+    Rules:
+    - Return ONLY valid JSON.
+    - Do NOT wrap the JSON in ```json.
+    - Do NOT explain anything.
+    - Every flashcard must have:
+        - question
+        - answer
+    - Questions should test important concepts.
+    - Answers should be concise.
+
+    Example format:
+
+    [
+        {{
+            "question": "What is TCP?",
+            "answer": "Transmission Control Protocol"
+        }},
+        {{
+            "question": "What is UDP?",
+            "answer": "User Datagram Protocol"
+        }},
+        {{
+            "question": "Which layer does HTTP belong to?",
+            "answer": "Application Layer"
+        }}
+    ]
+
+    Study Material:
+
+    {text}
+    """
+
+    response = llm.invoke(prompt)
+
+    cleaned = (
+    response.text
+    .replace("```json", "")
+    .replace("```", "")
+    .strip()
+    )
+
+    return json.loads(cleaned)
