@@ -11,6 +11,7 @@ import UserContext from './context/UserContext.jsx';
 import ChatContext from './context/ChatContext.jsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import DocumentsContext from './context/DocumentsContext.jsx';
+import QuizContext from './context/QuizContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
@@ -18,7 +19,9 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <DocumentsContext>
         <ChatContext >
-          <App />
+          <QuizContext >
+            <App />
+          </QuizContext>
         </ChatContext>
       </DocumentsContext>
     </BrowserRouter>
