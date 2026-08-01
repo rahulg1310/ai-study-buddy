@@ -17,3 +17,6 @@ class ChatRequest(BaseModel):
 
 class FlashcardRequest(BaseModel):
     existing_questions: list[str] = []
+
+class QuizRequest(BaseModel):
+    existing_questions: list[str] = []

@@ -135,3 +135,59 @@ def generate_flashcards(text, existing_questions):
     )
 
     return json.loads(cleaned)
+
+def generate_quiz(text, existing_questions=None):
+    if existing_questions is None:
+        existing_questions = []
+    previous = "\n".join(
+        f"- {q}"
+        for q in existing_questions
+    )
+    prompt = f"""
+    Already generated questions:
+
+    {previous}
+
+    You are Grace, an AI Study Buddy.
+
+    Generate EXACTLY 5 multiple choice quiz questions from the study material below.
+
+    Rules:
+    - Return ONLY valid JSON.
+    - Do NOT wrap the JSON in ```json.
+    - Do NOT explain anything outside the JSON.
+    - Every quiz question must have:
+        - question (string)
+        - options (array of 4 strings)
+        - correct_answer (integer 0-3 representing index of correct option)
+        - explanation (string explaining why the answer is correct)
+    - Questions should test key concepts from the study material.
+    - Options should be distinct and plausible.
+    - Do NOT repeat any previously generated questions.
+
+    Example format:
+
+    [
+        {{
+            "question": "Which layer of the OSI model handles routing?",
+            "options": ["Data Link", "Network", "Transport", "Session"],
+            "correct_answer": 1,
+            "explanation": "The Network layer (Layer 3) is responsible for packet forwarding and routing."
+        }}
+    ]
+
+    Study Material:
+
+    {text}
+    """
+
+    response = llm.invoke(prompt)
+
+    cleaned = (
+        response.text
+        .replace("```json", "")
+        .replace("```", "")
+        .strip()
+    )
+
+    return json.loads(cleaned)

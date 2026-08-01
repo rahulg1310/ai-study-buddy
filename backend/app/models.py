@@ -32,3 +32,12 @@ class ChatMessage(Base):
     created_at = Column(DateTime,default=datetime.utcnow,nullable=False)
     document_id = Column(Integer, ForeignKey("documents.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
+
+class Quiz(Base):
+    __tablename__ = "quizzes"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False, default="Generated Quiz")
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    questions = Column(JSONB, default=list)
+    document_id = Column(Integer, ForeignKey("documents.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
